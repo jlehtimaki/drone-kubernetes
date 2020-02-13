@@ -53,7 +53,6 @@ func main() {
       Name:   "kubernetes_namespace",
       Usage:  "Namespace for Kubernetes",
       EnvVar: "PLUGIN_NAMESPACE",
-      Value:  "default",
     },
     cli.StringFlag{
       Name:   "aws_region",

@@ -33,3 +33,28 @@ docker run --rm -it -e AWS_ACCESS_KEY=.... -e PLUGIN_ASSUME_ROLE=.... -e AWS_SEC
 | PLUGIN_NAMESPACE      | Kubernetes namespace          | NO            | default       | -              |
 | PLUGIN_CLUSTER_NAME   | EKS Cluster name              | NO            | EKS-Cluster   | -              |
 | PLUGIN_MANIFEST_DIR   | Directory holding the manifests| NO           | ./            | -              |
+
+
+## Drone pipeline example
+```yaml
+kind: pipeline
+type: kubernetes
+name: Drone example pipeline
+
+steps:
+  - name: Deploy test app
+    image: lehtux/drone-eks-kubernetes
+    environment:
+      AWS_REGION: "eu-west-1"
+      AWS_ACCESS_KEY_ID:
+        from_secret: access_key
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: access_key_secret
+    settings:
+      assume_role: arn:aws:iam::xxxxxx:role/EKS
+      actions: ["apply"]
+      namespace: default
+      kubectl_version: v1.16.6
+      manifest_dir: deployments/deployment.yml
+
+```

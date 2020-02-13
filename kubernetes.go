@@ -16,11 +16,21 @@ var (
 )
 
 func kubeApply(kube Kube) *exec.Cmd {
-  return exec.Command(kubeExe,"-n",kube.Namespace,"apply","-f",kube.ManifestDir)
+  var args []string
+  if kube.Namespace != "" {
+    args = append(args, "-n", kube.Namespace)
+  }
+  args = append(args, "apply", "-f", kube.ManifestDir)
+  return exec.Command(kubeExe,args...)
 }
 
 func kubeDelete(kube Kube) *exec.Cmd {
-  return exec.Command(kubeExe,"-n",kube.Namespace,"delete","-f",kube.ManifestDir)
+  var args []string
+  if kube.Namespace != "" {
+    args = append(args, "-n", kube.Namespace)
+  }
+  args = append(args, "delete", "-f", kube.ManifestDir)
+  return exec.Command(kubeExe, args...)
 }
 
 func kubeTest() *exec.Cmd {
