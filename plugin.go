@@ -28,6 +28,9 @@ type (
     ManifestDir     string
     ClusterName     string
     Namespace       string
+    Kustomize       bool
+    AppVersion      string
+    ImageName       string
   }
 
   // Plugin represents the plugin instance to be executed
@@ -61,6 +64,10 @@ func (p Plugin) Exec() error {
   // Get kubeconfig config
   commands = append(commands, awsGetKubeConfig(p.Kube.ClusterName, p.Config.Region))
 
+  // Set version with Kustomize
+  if p.Kube.Version != "" {
+    commands = append(commands, kustomizeSetVersion(p.Kube))
+  }
   // Add commands listed in actions
   for _, action := range p.Kube.Commands {
     switch action {
@@ -81,6 +88,10 @@ func (p Plugin) Exec() error {
     c.Stderr = os.Stderr
     if !p.Config.Sensitive {
       trace(c)
+    }
+
+    if strings.Contains(c.String(), "edit") {
+      c.Dir = p.Kube.ManifestDir
     }
 
     err := c.Run()

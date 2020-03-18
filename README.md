@@ -33,7 +33,9 @@ docker run --rm -it -e AWS_ACCESS_KEY=.... -e PLUGIN_ASSUME_ROLE=.... -e AWS_SEC
 | PLUGIN_NAMESPACE      | Kubernetes namespace          | NO            | default       | -              |
 | PLUGIN_CLUSTER_NAME   | EKS Cluster name              | NO            | EKS-Cluster   | -              |
 | PLUGIN_MANIFEST_DIR   | Directory holding the manifests| NO           | ./            | -              |
-
+| PLUGIN_KUSTOMIZE      | Use Kustomize                 | NO            | false         | true / false   |
+| PLUGIN_VERSION        | Version to deploy             | NO            | -             | -              |
+| PLUGIN_IMAGE          | Image name of the deployment. Used with Kustomize | NO | -    | -              |
 
 ## Drone pipeline example
 ```yaml

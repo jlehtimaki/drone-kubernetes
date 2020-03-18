@@ -60,6 +60,22 @@ func main() {
       EnvVar: "AWS_REGION",
       Value:  "eu-west-1",
     },
+    cli.StringFlag{
+      Name:   "kustomize",
+      Usage:  "To use kustomize",
+      EnvVar: "PLUGIN_KUSTOMIZE",
+      Value:  "false",
+    },
+    cli.StringFlag{
+      Name:   "image.version",
+      Usage:  "Version to be deployed",
+      EnvVar: "PLUGIN_IMAGE_VERSION",
+    },
+    cli.StringFlag{
+      Name:   "image.name",
+      Usage:  "Image name to be changed",
+      EnvVar: "PLUGIN_IMAGE",
+    },
   }
 
   if err := app.Run(os.Args); err != nil {
@@ -79,6 +95,9 @@ func run(c *cli.Context) error {
       ClusterName:      c.String("cluster_name"),
       ManifestDir:      c.String("manifest_dir"),
       Namespace:        c.String("kubernetes_namespace"),
+      AppVersion:       c.String("image.version"),
+      Kustomize:        c.Bool("kustomize"),
+      ImageName:        c.String("image.name"),
     },
   }
 
