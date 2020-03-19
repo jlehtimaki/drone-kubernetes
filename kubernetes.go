@@ -9,28 +9,52 @@ import (
   "os/exec"
 )
 
-const kubeExe = "kubectl"
+const kubeExe       = "kubectl"
+const kustomizeExe  = "kustomize"
 
 var (
   path        = "/bin/kubectl"
 )
 
 func kubeApply(kube Kube) *exec.Cmd {
+  if kube.Kustomize {
+    if kube.Namespace != "" {
+      cmd := fmt.Sprintf("kustomize build %s | kubectl -n %s apply -f -", kube.ManifestDir, kube.Namespace)
+      return exec.Command("bash","-c", cmd)
+    }
+    cmd := fmt.Sprintf("kustomize build %s | kubectl apply -f -", kube.ManifestDir)
+    return exec.Command("bash","-c", cmd)
+  }
+
   var args []string
   if kube.Namespace != "" {
-    args = append(args, "-n", kube.Namespace)
+    args = append(args, "--namespace", kube.Namespace)
   }
   args = append(args, "apply", "-f", kube.ManifestDir)
   return exec.Command(kubeExe,args...)
 }
 
 func kubeDelete(kube Kube) *exec.Cmd {
+  if kube.Kustomize {
+    if kube.Namespace != "" {
+      cmd := fmt.Sprintf("kustomize build %s | kubectl -n %s delete -f -", kube.ManifestDir, kube.Namespace)
+      return exec.Command("bash","-c", cmd)
+    }
+    cmd := fmt.Sprintf("kustomize build %s | kubectl delete -f -", kube.ManifestDir)
+    return exec.Command("bash","-c", cmd)
+  }
+
   var args []string
   if kube.Namespace != "" {
-    args = append(args, "-n", kube.Namespace)
+    args = append(args, "--namespace", kube.Namespace)
   }
   args = append(args, "delete", "-f", kube.ManifestDir)
   return exec.Command(kubeExe, args...)
+}
+
+func kustomizeSetVersion(kube Kube) *exec.Cmd {
+  imageName := fmt.Sprintf("%s:%s", kube.ImageName, kube.AppVersion)
+  return exec.Command(kustomizeExe,"edit", "set", "image", imageName)
 }
 
 func kubeTest() *exec.Cmd {
