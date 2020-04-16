@@ -65,7 +65,7 @@ func (p Plugin) Exec() error {
   commands = append(commands, awsGetKubeConfig(p.Kube.ClusterName, p.Config.Region))
 
   // Set version with Kustomize
-  if p.Kube.Version != "" {
+  if p.Kube.AppVersion != "" {
     commands = append(commands, kustomizeSetVersion(p.Kube))
   }
   // Add commands listed in actions
