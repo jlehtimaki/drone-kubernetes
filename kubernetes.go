@@ -17,7 +17,7 @@ var (
 )
 
 func kubeApply(kube Kube) *exec.Cmd {
-  if kube.Kustomize {
+  if kube.Kustomize == "true" {
     if kube.Namespace != "" {
       cmd := fmt.Sprintf("kustomize build %s | kubectl -n %s apply -f -", kube.ManifestDir, kube.Namespace)
       return exec.Command("bash","-c", cmd)
@@ -35,7 +35,7 @@ func kubeApply(kube Kube) *exec.Cmd {
 }
 
 func kubeDelete(kube Kube) *exec.Cmd {
-  if kube.Kustomize {
+  if kube.Kustomize == "true" {
     if kube.Namespace != "" {
       cmd := fmt.Sprintf("kustomize build %s | kubectl -n %s delete -f -", kube.ManifestDir, kube.Namespace)
       return exec.Command("bash","-c", cmd)

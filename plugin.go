@@ -28,7 +28,7 @@ type (
     ManifestDir     string
     ClusterName     string
     Namespace       string
-    Kustomize       bool
+    Kustomize       string
     AppVersion      string
     ImageName       string
   }

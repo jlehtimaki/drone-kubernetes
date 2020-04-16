@@ -96,7 +96,7 @@ func run(c *cli.Context) error {
       ManifestDir:      c.String("manifest_dir"),
       Namespace:        c.String("kubernetes_namespace"),
       AppVersion:       c.String("image.version"),
-      Kustomize:        c.Bool("kustomize"),
+      Kustomize:        c.String("kustomize"),
       ImageName:        c.String("image.name"),
     },
   }
