@@ -26,7 +26,7 @@ FROM ubuntu:18.04
 RUN apt update && apt install -y less ca-certificates
 
 # Copy binaries
-COPY --from=builder /build/drone-eks-kubernetes /bin/
+COPY --from=builder /build/drone-kubernetes /bin/
 COPY --from=builder /build/kubectl /bin/
 COPY --from=builder /build/aws .
 COPY --from=builder /build/kustomize /bin/
@@ -34,4 +34,4 @@ COPY --from=builder /build/kustomize /bin/
 # Install AWSCli
 RUN ./install -b /bin/
 
-ENTRYPOINT ["/bin/drone-eks-kubernetes"]
+ENTRYPOINT ["/bin/drone-kubernetes"]

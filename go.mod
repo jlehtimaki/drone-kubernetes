@@ -1,4 +1,4 @@
-module github.com/jlehtimaki/drone-eks-kubernetes
+module github.com/jlehtimaki/drone-kubernetes
 
 go 1.13
 

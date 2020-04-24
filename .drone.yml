@@ -1,0 +1,30 @@
+kind: pipeline
+type: kubernetes
+name: Build Drone Kubernetes
+
+steps:
+- name: Build ARM64 Container
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: username
+    password:
+      from_secret: password
+    dockerfile: Dockerfile-arm64
+    repo: lehtux/drone-kubernetes-arm64
+    tags:
+      - v0.0.4
+      - latest
+
+- name: Build AMD64 Container
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: username
+    password:
+      from_secret: password
+    dockerfile: Dockerfile
+    repo: lehtux/drone-kubernetes
+    tags:
+      - v0.0.4
+      - latest

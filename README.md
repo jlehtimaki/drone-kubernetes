@@ -1,10 +1,14 @@
 # drone-kubernetes
 Drone plugin for different Kubernetes deployments. 
-This plugin enables easy deployments to do Kubernetes in your EKS clusters and Baremetal clusters. \
+This plugin enables easy deployments to do Kubernetes in your EKS clusters and Baremetal clusters.
 
 ## Supported types of Kubernetes
-- EKS
-- Baremetal
+| Architecture  | Type      | Kustomize | Other notes   |
+| ------------  |:----:     |:---------:|:-----------:  |
+| AMD64         | EKS       | Yes       | --            |
+| ARMv8         | EKS       | No        | Assume Role does not work because of AWSCli problems |
+| AMD64         | Baremetal | Yes       | --            |
+| ARMv8         | Baremetal | No        | Can use just plain kubectl commands due to ARM restrictions, will be fixed in the future| 
 
 ## Parameters
 | Paramenter            | Description                   |Required       | Default Value | Allowed Values |
