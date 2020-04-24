@@ -1,4 +1,4 @@
-# drone-eks-kubernetes
+# drone-eks
 Drone plugin for AWS EKS. This will help to do Kubernetes deployments to your EKS cluster
 
 ## Build
@@ -45,7 +45,7 @@ name: Drone example pipeline
 
 steps:
   - name: Deploy test app
-    image: lehtux/drone-eks-kubernetes
+    image: lehtux/drone-eks
     environment:
       AWS_REGION: "eu-west-1"
       AWS_ACCESS_KEY_ID:
