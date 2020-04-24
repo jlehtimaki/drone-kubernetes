@@ -28,6 +28,33 @@ func main() {
       Value:  &cli.StringSlice{"test"},
     },
     cli.StringFlag{
+      Name:   "type",
+      Usage:  "A Type of Kubernetes deployment. eg. EKS, GKE, Baremetal",
+      EnvVar: "PLUGIN_TYPE",
+      Value:  "Baremetal",
+    },
+    cli.StringFlag{
+      Name:   "k8s_ca",
+      Usage:  "CA Certificate to Kubernetes",
+      EnvVar: "PLUGIN_CA",
+    },
+    cli.StringFlag{
+      Name:   "k8s_token",
+      Usage:  "Token to Kubernetes",
+      EnvVar: "PLUGIN_TOKEN",
+    },
+    cli.StringFlag{
+      Name:   "k8s_user",
+      Usage:  "Kubernetes user to authenticate",
+      EnvVar: "PLUGIN_K8S_USER",
+      Value:  "default",
+    },
+    cli.StringFlag{
+      Name:   "k8s_server",
+      Usage:  "Kubernetes server address",
+      EnvVar: "PLUGIN_K8S_SERVER",
+    },
+    cli.StringFlag{
       Name:   "assume_role",
       Usage:  "A role to assume before running the awscli commands",
       EnvVar: "PLUGIN_ASSUME_ROLE",
@@ -88,8 +115,13 @@ func run(c *cli.Context) error {
     Config: Config{
       RoleARN:          c.String("assume_role"),
       Region:           c.String("aws_region"),
+      ServerAddress:    c.String("k8s_server"),
+      K8SUser:          c.String("k8s_user"),
+      K8SCert:          c.String("k8s_ca"),
+      K8SToken:         c.String("k8s_token"),
     },
     Kube: Kube{
+      Type:             c.String("type"),
       Version:          c.String("kubectl_version"),
       Commands:         c.StringSlice("actions"),
       ClusterName:      c.String("cluster_name"),

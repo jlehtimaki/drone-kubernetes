@@ -2,27 +2,26 @@ package main
 
 import (
   "fmt"
+  "github.com/sirupsen/logrus"
   "os"
   "os/exec"
   "strings"
-  "time"
-
-  "github.com/aws/aws-sdk-go/aws/credentials"
-  "github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-  "github.com/aws/aws-sdk-go/aws/session"
-  "github.com/aws/aws-sdk-go/service/sts"
-  "github.com/sirupsen/logrus"
 )
 
 type (
   // Config holds input parameters for the plugin
   Config struct {
-    Sensitive        bool
-    RoleARN          string
-    Region           string
+    Sensitive       bool
+    RoleARN         string
+    Region          string
+    ServerAddress   string
+    K8SCert         string
+    K8SToken        string
+    K8SUser         string
   }
 
   Kube struct {
+    Type            string
     Version         string
     Commands        []string
     ManifestDir     string
@@ -50,10 +49,6 @@ func (p Plugin) Exec() error {
     }
   }
 
-  if p.Config.RoleARN != "" {
-    assumeRole(p.Config.RoleARN)
-  }
-
   // Initialize commands
   var commands []*exec.Cmd
 
@@ -61,8 +56,20 @@ func (p Plugin) Exec() error {
   commands = append(commands, exec.Command(kubeExe, "version", "--client=true"))
   commands = append(commands, exec.Command(awsCliExe, "--version"))
 
-  // Get kubeconfig config
-  commands = append(commands, awsGetKubeConfig(p.Kube.ClusterName, p.Config.Region))
+  if p.Kube.Type == "EKS" {
+    fmt.Println("Using EKS type of Kubernetes settings")
+    // Assume AWS Role
+    if p.Config.RoleARN != "" {
+      assumeRole(p.Config.RoleARN)
+    }
+    // Get kubeconfig config
+    commands = append(commands, awsGetKubeConfig(p.Kube.ClusterName, p.Config.Region))
+  }
+
+  if p.Kube.Type == "Baremetal" {
+    fmt.Println("Using Baremetal type of Kubernetes settings")
+    commands = append(commands, bareMetalSetKubeConfig(p.Config.K8SToken, p.Config.K8SCert, p.Config.ServerAddress, p.Config.K8SUser)...)
+  }
 
   // Set version with Kustomize
   if p.Kube.AppVersion != "" {
@@ -105,29 +112,6 @@ func (p Plugin) Exec() error {
 
   return nil
 }
-
-func assumeRole(roleArn string) {
-  client := sts.New(session.New())
-  duration := time.Hour * 1
-  stsProvider := &stscreds.AssumeRoleProvider{
-    Client:          client,
-    Duration:        duration,
-    RoleARN:         roleArn,
-    RoleSessionName: "drone",
-  }
-
-  value, err := credentials.NewCredentials(stsProvider).Get()
-  if err != nil {
-    logrus.WithFields(logrus.Fields{
-      "error": err,
-    }).Fatal("Error assuming role!")
-  }
-  os.Setenv("AWS_ACCESS_KEY_ID", value.AccessKeyID)
-  os.Setenv("AWS_SECRET_ACCESS_KEY", value.SecretAccessKey)
-  os.Setenv("AWS_SESSION_TOKEN", value.SessionToken)
-}
-
-
 
 func trace(cmd *exec.Cmd) {
   fmt.Println("$", strings.Join(cmd.Args, " "))
