@@ -4,7 +4,7 @@ ENV GOARCH=amd64 GOOS=linux CGO_ENABLED=0
 RUN apk add --no-cache curl unzip bash
 
 WORKDIR /build
-COPY . .
+COPY .. .
 
 # Fetch Kubectl
 RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.17.3/bin/linux/amd64/kubectl
