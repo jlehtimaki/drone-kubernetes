@@ -1,30 +1,97 @@
+---
 kind: pipeline
 type: kubernetes
-name: Build Drone Kubernetes
+name: drone-kubernetes-linux-amd64
+
+platform:
+  arch: amd64
+  os: linux
 
 steps:
-- name: Build ARM64 Container
-  image: plugins/docker
-  settings:
-    username:
-      from_secret: username
-    password:
-      from_secret: password
-    dockerfile: Dockerfile-arm64
-    repo: lehtux/drone-kubernetes-arm64
-    tags:
-      - v0.0.4
-      - latest
+  - name: build
+    image: golang:1.13.0
+    commands:
+      - go build
+    environment:
+      GOARCH: amd64
+      GOOS: linux
 
-- name: Build AMD64 Container
-  image: plugins/docker
-  settings:
-    username:
-      from_secret: username
-    password:
-      from_secret: password
-    dockerfile: Dockerfile
-    repo: lehtux/drone-kubernetes
-    tags:
-      - v0.0.4
-      - latest
+  - name: publish
+    image: plugins/docker:18
+    settings:
+      auto_tag: true
+      auto_tag_suffix: linux-amd64
+      dockerfile: docker/Dockerfile
+      repo: lehtux/drone-kubernetes
+      username:
+        from_secret: username
+      password:
+        from_secret: password
+    when:
+      event:
+        - push
+        - tag
+
+---
+kind: pipeline
+type: kubernetes
+name: drone-kubernetes-linux-arm64
+
+platform:
+  arch: arm64
+  os: linux
+
+steps:
+  - name: build
+    image: golang:1.13.0
+    commands:
+      - go build
+    environment:
+      GOARCH: arm64
+      GOOS: linux
+
+  - name: publish
+    image: plugins/docker:18
+    settings:
+      auto_tag: true
+      auto_tag_suffix: linux-arm64
+      dockerfile: Dockerfile-arm64
+      repo: lehtux/drone-kubernetes
+      username:
+        from_secret: username
+      password:
+        from_secret: password
+
+trigger:
+  event:
+    - push
+    - tag
+
+depends_on:
+  - drone-kubernetes-linux-amd64
+
+---
+kind: pipeline
+type: kubernetes
+name: manifest
+
+steps:
+  - name: publish
+    image: plugins/manifest:1.2
+    settings:
+      auto_tag: true
+      ignore_missing: true
+      spec: docker/manifest.server.tmpl
+      username:
+        from_secret: username
+      password:
+        from_secret: password
+
+trigger:
+  event:
+    - push
+    - tag
+
+depends_on:
+  - drone-kubernetes-linux-arm64
+  - drone-kubernetes-linux-amd64
