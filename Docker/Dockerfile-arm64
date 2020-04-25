@@ -1,0 +1,13 @@
+FROM arm64v8/ubuntu:20.04
+
+# Install Curl package
+RUN apt update && apt install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Fetch Kubectl
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.17.3/bin/linux/arm64/kubectl
+RUN chmod +x kubectl && mv kubectl /bin/
+
+# Copy drone-kubernetes binary
+COPY drone-kubernetes /bin/
+
+ENTRYPOINT ["/bin/drone-kubernetes"]

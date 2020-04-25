@@ -54,14 +54,18 @@ func (p Plugin) Exec() error {
 
   // Print Kubectl version
   commands = append(commands, exec.Command(kubeExe, "version", "--client=true"))
-  commands = append(commands, exec.Command(awsCliExe, "--version"))
 
   if p.Kube.Type == "EKS" {
     fmt.Println("Using EKS type of Kubernetes settings")
+
+    // Printing AWSCli client version
+    commands = append(commands, exec.Command(awsCliExe, "--version"))
+
     // Assume AWS Role
     if p.Config.RoleARN != "" {
       assumeRole(p.Config.RoleARN)
     }
+
     // Get kubeconfig config
     commands = append(commands, awsGetKubeConfig(p.Kube.ClusterName, p.Config.Region))
   }
