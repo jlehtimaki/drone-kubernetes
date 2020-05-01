@@ -8,8 +8,10 @@ import (
 
 func bareMetalSetKubeConfig(token string, cert string, server string, user string) []*exec.Cmd {
 	fmt.Println("Setting up Baremetal Kubernetes configuration")
-	// Write certificate file
-	writeCertToFile(cert)
+	if cert != "" {
+		// Write certificate file
+		writeCertToFile(cert)
+	}
 
 	// Assign all needed kubernetes commands and return them
 	var commands []*exec.Cmd
@@ -17,7 +19,11 @@ func bareMetalSetKubeConfig(token string, cert string, server string, user strin
 	serverString := fmt.Sprintf("--server=%s", server)
 	userString := fmt.Sprintf("--user=%s", user)
 	commands = append(commands, exec.Command(kubeExe, "config", "set-credentials", "default", tokenString))
-	commands = append(commands, exec.Command(kubeExe, "config", "set-cluster", "default", serverString, "--certificate-authority=ca.crt"))
+	if cert != "" {
+		commands = append(commands, exec.Command(kubeExe, "config", "set-cluster", "default", serverString, "--certificate-authority=ca.crt"))
+	} else {
+		commands = append(commands, exec.Command(kubeExe, "config", "set-cluster", "default", serverString, "--insecure-skip-tls-verify=true"))
+	}
 	commands = append(commands, exec.Command(kubeExe, "config", "set-context", "default", "--cluster=default", userString))
 	commands = append(commands, exec.Command(kubeExe, "config", "use-context", "default"))
 	return commands
