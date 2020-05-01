@@ -73,9 +73,6 @@ func (p Plugin) Exec() error {
 	if p.Kube.Type == "Baremetal" {
 		fmt.Println("Using Baremetal type of Kubernetes settings")
 		commands = append(commands, bareMetalSetKubeConfig(p.Config.K8SToken, p.Config.K8SCert, p.Config.ServerAddress, p.Config.K8SUser)...)
-		commands = append(commands, exec.Command("ls","-la"))
-		commands = append(commands, exec.Command("cat","ca.crt"))
-		commands = append(commands, exec.Command("sleep","600"))
 	}
 
 	// Set version with Kustomize
