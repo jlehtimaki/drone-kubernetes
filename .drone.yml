@@ -29,7 +29,6 @@ steps:
         from_secret: password
     when:
       event:
-        - push
         - tag
 
 ---
@@ -64,7 +63,6 @@ steps:
 
 trigger:
   event:
-    - push
     - tag
 
 depends_on:
@@ -89,7 +87,6 @@ steps:
 
 trigger:
   event:
-    - push
     - tag
 
 depends_on:
