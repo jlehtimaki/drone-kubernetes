@@ -17,7 +17,7 @@ This plugin enables easy deployments to do Kubernetes in your EKS clusters and B
 | AWS_SECRET_KEY        | AWS Access key secret         | YES           | -             | -              |
 | AWS_REGION            | AWS Region                    | NO            | eu-west-1     | -              |
 | PLUGIN_ASSUME_ROLE    | AWS Assume role               | NO            | -             | Role ARN       |
-| PLUGIN_ACTIONS        | AWS Client command to be run  | YES           | test          | test/apply/delete|
+| PLUGIN_ACTIONS        | AWS Client command to be run  | YES           | test          | apply/delete/diff|
 | PLUGIN_KUBECTL_VERSION| Kubectl version to be installed| NO           | v1.7.3        | -              |
 | PLUGIN_NAMESPACE      | Kubernetes namespace          | NO            | default       | -              |
 | PLUGIN_CLUSTER_NAME   | EKS Cluster name              | NO            | EKS-Cluster   | -              |
