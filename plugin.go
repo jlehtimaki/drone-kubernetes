@@ -39,6 +39,19 @@ type (
 	}
 )
 
+var (
+	allowedCommands = []string {"apply", "delete", "diff"}
+)
+
+func allowedCommand(command string) bool {
+	for _, com := range allowedCommands {
+		if com == command {
+			return true
+		}
+	}
+	return false
+}
+
 // Exec executes the plugin
 func (p Plugin) Exec() error {
 	// Install specified version of kubectl
@@ -81,14 +94,9 @@ func (p Plugin) Exec() error {
 	}
 	// Add commands listed in actions
 	for _, action := range p.Kube.Commands {
-		switch action {
-		case "apply":
-			commands = append(commands, kubeApply(p.Kube))
-		case "delete":
-			commands = append(commands, kubeDelete(p.Kube))
-		case "test":
-			commands = append(commands, kubeTest())
-		default:
+		if allowedCommand(action) {
+			commands = append(commands, kubeCommand(p.Kube, action))
+		} else {
 			return fmt.Errorf("valid actions are: apply, destroy.  You provided %s", action)
 		}
 	}
