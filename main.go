@@ -25,7 +25,7 @@ func main() {
 			Name:   "actions",
 			Usage:  "a list of actions to have kubectl perform",
 			EnvVar: "PLUGIN_ACTIONS",
-			Value:  &cli.StringSlice{"test"},
+			Value:  &cli.StringSlice{"diff"},
 		},
 		cli.StringFlag{
 			Name:   "type",
