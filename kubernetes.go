@@ -17,20 +17,15 @@ var (
 )
 
 func kubeCommand(kube Kube, command string) *exec.Cmd {
-	if kube.Kustomize == "true" {
-		if kube.Namespace != "" {
-			cmd := fmt.Sprintf("kustomize build %s | kubectl -n %s %s -f -", kube.ManifestDir,kube.Namespace, command)
-			return exec.Command("bash", "-c", cmd)
-		}
-		cmd := fmt.Sprintf("kustomize build %s | kubectl %s -f -", kube.ManifestDir, command)
-		return exec.Command("bash", "-c", cmd)
-	}
-
 	var args []string
 	if kube.Namespace != "" {
 		args = append(args, "--namespace", kube.Namespace)
 	}
-	args = append(args, command, "-f", kube.ManifestDir)
+	if kube.Kustomize == "true" {
+		args = append(args, command, "-f", "-")
+	} else {
+		args = append(args, command, "-f", kube.ManifestDir)
+	}
 	return exec.Command(kubeExe, args...)
 }
 

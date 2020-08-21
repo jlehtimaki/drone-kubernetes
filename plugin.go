@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -40,7 +41,7 @@ type (
 )
 
 var (
-	allowedCommands = []string {"apply", "delete", "diff"}
+	allowedCommands = []string{"apply", "delete", "diff"}
 )
 
 func allowedCommand(command string) bool {
@@ -113,12 +114,57 @@ func (p Plugin) Exec() error {
 			c.Dir = p.Kube.ManifestDir
 		}
 
-		err := c.Run()
-		if err != nil {
-			logrus.WithFields(logrus.Fields{
-				"error": err,
-			}).Fatal("Failed to execute a command")
+		if p.Kube.Kustomize == "true" {
+			// Pipeline the kustomize build command with kubectl command
+			c1 := exec.Command(kustomizeExe, "build", p.Kube.ManifestDir)
+			c2 := c
+
+			pr, pw := io.Pipe()
+			c1.Stdout = pw
+			c2.Stdin = pr
+			c2.Stdout = os.Stdout
+
+			err := c1.Start()
+			if err != nil {
+				logrus.WithFields(logrus.Fields{
+					"error": err,
+				}).Fatal("Failed to execute a command")
+			}
+			err = c2.Start()
+			// If kubectl command is diff ignore exit code since diff returns exit 1 if the is changes
+			if err != nil && !strings.Contains(c.String(), "diff") {
+				logrus.WithFields(logrus.Fields{
+					"error": err,
+				}).Fatal("Failed to execute a command")
+			}
+
+			go func() {
+				defer pw.Close()
+				err = c1.Wait()
+				if err != nil {
+					logrus.WithFields(logrus.Fields{
+						"error": err,
+					}).Fatal("Failed to wait kustomize to end")
+				}
+			}()
+			err = c2.Wait()
+			if err != nil && !strings.Contains(c.String(), "diff") {
+				logrus.Info(p.Kube.Type)
+				logrus.WithFields(logrus.Fields{
+					"error": err,
+				}).Fatal("Failed to wait command to finish")
+			}
+		} else {
+			err := c.Run()
+			// If kubectl command is diff ignore exit code since diff returns exit 1 if the is changes
+			if err != nil && !strings.Contains(c.String(), "diff") {
+				logrus.Info(c.String())
+				logrus.WithFields(logrus.Fields{
+					"error": err,
+				}).Fatal("Failed to execute a command")
+			}
 		}
+
 		logrus.Debug("Command completed successfully")
 	}
 
