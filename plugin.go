@@ -118,9 +118,20 @@ func (p Plugin) Exec() error {
 			c1 := exec.Command(kustomizeExe, "build", p.Kube.ManifestDir)
 			c2 := c
 
-			c2.Stdin, _ = c1.StdoutPipe()
+			// initialize error
+			var err error
+
+			// pipe the commands
+			c2.Stdin, err = c1.StdoutPipe()
+			if err != nil {
+				logrus.WithFields(logrus.Fields{
+					"error": err,
+				}).Fatal("Failed to pipeline commands")
+			}
 			c2.Stdout = os.Stdout
-			err := c2.Start()
+
+			// run the commands
+			err = c2.Start()
 			if err != nil {
 				logrus.WithFields(logrus.Fields{
 					"error": err,
@@ -132,6 +143,8 @@ func (p Plugin) Exec() error {
 					"error": err,
 				}).Fatal("Failed to execute kustomize command")
 			}
+
+			// wait for the first command to finish
 			err = c2.Wait()
 			if err != nil {
 				logrus.WithFields(logrus.Fields{
