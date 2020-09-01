@@ -2,15 +2,15 @@
 Drone plugin for different Kubernetes deployments. 
 This plugin enables easy deployments to do Kubernetes in your EKS clusters and Baremetal clusters.
 
-## Supported types of Kubernetes
+# Supported types of Kubernetes
 | Architecture  | Type      | Kustomize | Other notes   |
 | ------------  |:----:     |:---------:|:-----------:  |
 | AMD64         | EKS       | Yes       | --            |
-| ARMv8         | EKS       | No        | Assume Role does not work because of AWSCli problems |
+| ARMv8         | EKS       | No        | --            |
 | AMD64         | Baremetal | Yes       | --            |
 | ARMv8         | Baremetal | No        | Can use just plain kubectl commands due to ARM restrictions, will be fixed in the future| 
 
-## Parameters
+# Parameters
 | Paramenter            | Description                   |Required       | Default Value | Allowed Values |
 | -------------         |:-------------:                |:-------------:|:-------------:|:-------------: |
 | AWS_ACCESS_KEY        | AWS Access key                | YES           | -             | -              |
@@ -18,7 +18,7 @@ This plugin enables easy deployments to do Kubernetes in your EKS clusters and B
 | AWS_REGION            | AWS Region                    | NO            | eu-west-1     | -              |
 | PLUGIN_ASSUME_ROLE    | AWS Assume role               | NO            | -             | Role ARN       |
 | PLUGIN_ACTIONS        | AWS Client command to be run  | YES           | test          | apply/delete/diff|
-| PLUGIN_KUBECTL_VERSION| Kubectl version to be installed| NO           | v1.7.3        | -              |
+| PLUGIN_KUBECTL_VERSION| Kubectl version to be installed| NO           | v1.8.3        | -              |
 | PLUGIN_NAMESPACE      | Kubernetes namespace          | NO            | default       | -              |
 | PLUGIN_CLUSTER_NAME   | EKS Cluster name              | NO            | EKS-Cluster   | -              |
 | PLUGIN_MANIFEST_DIR   | Directory holding the manifests| NO           | ./            | -              |
@@ -31,8 +31,8 @@ This plugin enables easy deployments to do Kubernetes in your EKS clusters and B
 | PLUGIN_K8S_SERVER     | Kubernetes server address     | NO            | -             | -              |
 | PLUGIN_K8S_USER       | Kubernetes authentication username | NO       | default       | -              |
 
-## Examples
-### Drone pipeline with AWS
+# Examples
+## Drone pipeline with AWS
 ```yaml
 kind: pipeline
 type: kubernetes
@@ -57,7 +57,7 @@ steps:
 
 ```
 
-### Drone pipeline with Baremetal
+## Drone pipeline with Baremetal
 ```yaml
 kind: pipeline
 type: kubernetes
@@ -80,21 +80,22 @@ steps:
       manifest_dir: deployments/deployment.yml
 ```
 
-## Build
+# Build
 Build the binary with the following commands:
 
-```export CGO_ENABLED=0
+```shell script
+export CGO_ENABLED=0
 go build
 ```
 
-## Docker
+# Docker
 
 Build the docker image with:
 ```
-docker build --rm=true -t lehtux/drone-eks-kubernetes .
+docker buildx build -f Docker/Dockerfile --platform linux/amd64,linux/arm64/v8 -t lehtux/drone-kubernetes --push .
 ```
 
-## Usage
+# Usage
 ```
 docker run --rm -it -e AWS_ACCESS_KEY=.... -e PLUGIN_ASSUME_ROLE=.... -e AWS_SECRET_KEY=.... 
 -e PLUGIN_ACTIONS="apply" -e PLUGIN_MANIFEST_DIR="manifests/" lehtux/drone-kubernetes

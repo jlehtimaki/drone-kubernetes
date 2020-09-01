@@ -3,6 +3,12 @@
 All notable changes will be shown here.
 
 Versioning follows Semantic Versioning principals.
+## v1.2.0 - 2020-09-01
+### Changes
+- Dockerfile changed to support multiarch builds using `docker buildx`
+- Rewrote downloadFile function
+- Rewrote pipelining kustomize commands
+- Rewrote `chmod` command to use `os.Chmod`
 
 ## v1.1.0 - 2020-08-13
 ### Added

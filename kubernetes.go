@@ -1,8 +1,8 @@
 package main
 
 import (
-	"crypto/tls"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"os"
@@ -35,7 +35,12 @@ func kustomizeSetVersion(kube Kube) *exec.Cmd {
 }
 
 func installKubectl(version string) error {
-	downloadUrl := fmt.Sprintf("https://storage.googleapis.com/kubernetes-release/release/%s/bin/linux/amd64/kubectl", version)
+	arch := os.Getenv("GOARCH")
+	if arch == "" {
+		arch = "amd64"
+	}
+	downloadUrl := fmt.Sprintf("https://storage.googleapis.com/kubernetes-release/release/%s/bin/linux/%s/kubectl", version, arch)
+	logrus.Info("Installing Kubectl version ", version)
 	err := downloadFile(path, downloadUrl)
 	if err != nil {
 		return err
@@ -48,8 +53,7 @@ func installKubectl(version string) error {
 }
 
 func addExecRights() error {
-	cmd := exec.Command("chmod", "+x", "/bin/kubectl")
-	err := cmd.Run()
+	err := os.Chmod("/bin/kubectl", 0777)
 	if err != nil {
 		return err
 	}
@@ -57,26 +61,38 @@ func addExecRights() error {
 }
 
 func downloadFile(filepath string, url string) error {
-	// Create the file
-	out, err := os.Create(filepath)
+	//Get the response bytes from the url
+	logrus.Info("Downloading file ", url)
+	response, err := http.Get(url)
+	if err != nil {
+	}
+	defer response.Body.Close()
+
+	//Create a empty file
+	file, err := os.Create(filepath)
 	if err != nil {
 		return err
 	}
-	defer out.Close()
+	defer file.Close()
 
-	// Get the data
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	// Writer the body to file
-	_, err = io.Copy(out, resp.Body)
+	//Write the bytes to the file
+	_, err = io.Copy(file, response.Body)
 	if err != nil {
 		return err
 	}
 
+	// Check that file exists
+	if !checkFileExists(filepath) {
+		return fmt.Errorf("kubectl file not found")
+	}
 	return nil
+}
+
+func checkFileExists(filepath string) bool {
+	// Returns true if file exists
+	_, err := os.Stat(filepath)
+	if err != nil {
+		return false
+	}
+	return true
 }
