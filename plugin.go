@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -119,40 +118,25 @@ func (p Plugin) Exec() error {
 			c1 := exec.Command(kustomizeExe, "build", p.Kube.ManifestDir)
 			c2 := c
 
-			pr, pw := io.Pipe()
-			c1.Stdout = pw
-			c2.Stdin = pr
+			c2.Stdin, _ = c1.StdoutPipe()
 			c2.Stdout = os.Stdout
-
-			err := c1.Start()
+			err := c2.Start()
 			if err != nil {
 				logrus.WithFields(logrus.Fields{
 					"error": err,
-				}).Fatal("Failed to execute a command")
+				}).Fatal("Failed to execute kubectl command")
 			}
-			err = c2.Start()
-			// If kubectl command is diff ignore exit code since diff returns exit 1 if the is changes
-			if err != nil && !strings.Contains(c.String(), "diff") {
+			err = c1.Run()
+			if err != nil {
 				logrus.WithFields(logrus.Fields{
 					"error": err,
-				}).Fatal("Failed to execute a command")
+				}).Fatal("Failed to execute kustomize command")
 			}
-
-			go func() {
-				defer pw.Close()
-				err = c1.Wait()
-				if err != nil {
-					logrus.WithFields(logrus.Fields{
-						"error": err,
-					}).Fatal("Failed to wait kustomize to end")
-				}
-			}()
 			err = c2.Wait()
-			if err != nil && !strings.Contains(c.String(), "diff") {
-				logrus.Info(p.Kube.Type)
+			if err != nil {
 				logrus.WithFields(logrus.Fields{
 					"error": err,
-				}).Fatal("Failed to wait command to finish")
+				}).Fatal("Failed to wait kustomize command")
 			}
 		} else {
 			err := c.Run()
