@@ -3,6 +3,10 @@
 All notable changes will be shown here.
 
 Versioning follows Semantic Versioning principals.
+## v1.2.2 - 2020-09-16
+### Bug fix
+- Fixed diff in kustomize command
+
 ## v1.2.0 - 2020-09-01
 ### Changes
 - Dockerfile changed to support multiarch builds using `docker buildx`

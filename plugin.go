@@ -143,10 +143,9 @@ func (p Plugin) Exec() error {
 					"error": err,
 				}).Fatal("Failed to execute kustomize command")
 			}
-
 			// wait for the first command to finish
 			err = c2.Wait()
-			if err != nil {
+			if err != nil && !strings.Contains(c.String(), "diff"){
 				logrus.WithFields(logrus.Fields{
 					"error": err,
 				}).Fatal("Failed to wait kustomize command")
