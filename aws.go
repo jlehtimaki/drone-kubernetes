@@ -18,6 +18,7 @@ func awsGetKubeConfig(clusterName string, region string) *exec.Cmd {
 }
 
 func assumeRole(roleArn string) {
+	logrus.Infof("assuming role %s", roleArn)
 	client := sts.New(session.New())
 	duration := time.Hour * 1
 	stsProvider := &stscreds.AssumeRoleProvider{

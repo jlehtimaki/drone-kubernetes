@@ -21,6 +21,8 @@ func kubeCommand(kube Kube, command string) *exec.Cmd {
 	if kube.Namespace != "" {
 		args = append(args, "--namespace", kube.Namespace)
 	}
+	// set kubeconfig
+	args = append(args, "--kubeconfig", "/root/.kube/config")
 	if kube.Kustomize == "true" {
 		args = append(args, command, "-f", "-")
 	} else {
