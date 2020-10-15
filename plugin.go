@@ -21,15 +21,17 @@ type (
 	}
 
 	Kube struct {
-		Type        string
-		Version     string
-		Commands    []string
-		ManifestDir string
-		ClusterName string
-		Namespace   string
-		Kustomize   string
-		AppVersion  string
-		ImageName   string
+		Type           string
+		Version        string
+		Commands       []string
+		ManifestDir    string
+		ClusterName    string
+		Namespace      string
+		Kustomize      string
+		AppVersion     string
+		ImageName      string
+		Rollout        string
+		RolloutTimeout string
 	}
 
 	// Plugin represents the plugin instance to be executed
@@ -101,6 +103,10 @@ func (p Plugin) Exec() error {
 		}
 	}
 
+	if p.Kube.Rollout == "true" {
+		commands = append(commands, checkRolloutStatus(p.Kube)...)
+	}
+
 	// Run commands
 	for _, c := range commands {
 		c.Stdout = os.Stdout
@@ -145,7 +151,7 @@ func (p Plugin) Exec() error {
 			}
 			// wait for the first command to finish
 			err = c2.Wait()
-			if err != nil && !strings.Contains(c.String(), "diff"){
+			if err != nil && !strings.Contains(c.String(), "diff") {
 				logrus.WithFields(logrus.Fields{
 					"error": err,
 				}).Fatal("Failed to wait kustomize command")
