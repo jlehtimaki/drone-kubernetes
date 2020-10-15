@@ -18,14 +18,14 @@ const kubeExe = "kubectl"
 const kustomizeExe = "kustomize"
 
 var (
-	path = "/bin/kubectl"
+	path      = "/bin/kubectl"
 	namespace = "default"
 )
 
 type DeploymentFile struct {
-	Kind 	string 	`yaml:"kind"`
+	Kind     string `yaml:"kind"`
 	Metadata struct {
-		Name	string	`yaml:"name"`
+		Name      string `yaml:"name"`
 		Namespace string `yaml:"namespace"`
 	}
 }
@@ -148,10 +148,10 @@ func checkRolloutStatus(kube Kube) []*exec.Cmd {
 						kubeExe,
 						"-n",
 						namespace,
-						"rollout","status",
+						"rollout", "status",
 						deploymentFile.Kind,
 						deploymentFile.Metadata.Name,
-						"--timeout",kube.RolloutTimeout,
+						"--timeout", kube.RolloutTimeout,
 					),
 				)
 			}
