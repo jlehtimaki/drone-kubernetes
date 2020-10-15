@@ -30,6 +30,8 @@ This plugin enables easy deployments to do Kubernetes in your EKS clusters and B
 | PLUGIN_CA             | Kubernetes CA certificate     | NO            | -             | -              |
 | PLUGIN_K8S_SERVER     | Kubernetes server address     | NO            | -             | -              |
 | PLUGIN_K8S_USER       | Kubernetes authentication username | NO       | default       | -              |
+| PLUGIN_ROLLOUT_CHECK  | Check rollout success         | NO            | true          | true / false   |
+| PLUGIN_ROLLOUT_TIMEOUT| Rollout check timeout         | NO            | 1m            | Xs, Xm, Xh ... |
 
 # Examples
 ## Drone pipeline with AWS

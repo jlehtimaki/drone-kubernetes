@@ -1,12 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"regexp"
 )
 
 const kubeExe = "kubectl"
@@ -14,7 +19,16 @@ const kustomizeExe = "kustomize"
 
 var (
 	path = "/bin/kubectl"
+	namespace = "default"
 )
+
+type DeploymentFile struct {
+	Kind 	string 	`yaml:"kind"`
+	Metadata struct {
+		Name	string	`yaml:"name"`
+		Namespace string `yaml:"namespace"`
+	}
+}
 
 func kubeCommand(kube Kube, command string) *exec.Cmd {
 	var args []string
@@ -95,4 +109,71 @@ func checkFileExists(filepath string) bool {
 		return false
 	}
 	return true
+}
+
+// Check the rollout statuses of each Deployment, Statefulset & DeamonSet
+func checkRolloutStatus(kube Kube) []*exec.Cmd {
+	// Init commands
+	var commands []*exec.Cmd
+
+	// find all yaml/yml files from the manifest directory
+	yamlFiles := findYAMLFiles(kube.ManifestDir)
+
+	// loop through the files and parse the yaml data
+	for _, file := range yamlFiles {
+		deploymentFile := DeploymentFile{}
+		yamlFile, err := ioutil.ReadFile(file)
+		if err != nil {
+			logrus.Errorf("could not read file %s", file)
+		}
+
+		// Set the correct namespace
+		if kube.Namespace != "" {
+			namespace = kube.Namespace
+		}
+
+		reader := bytes.NewReader(yamlFile)
+
+		decoder := yaml.NewDecoder(reader)
+
+		for decoder.Decode(&deploymentFile) == nil {
+			// Set the correct namespace
+			if deploymentFile.Metadata.Namespace != "" {
+				namespace = deploymentFile.Metadata.Namespace
+			}
+			// Set the commands rollout status commands if deployment kind matches
+			if deploymentFile.Kind == "Deployment" || deploymentFile.Kind == "StatefulSet" || deploymentFile.Kind == "DaemonSet" {
+				commands = append(
+					commands, exec.Command(
+						kubeExe,
+						"-n",
+						namespace,
+						"rollout","status",
+						deploymentFile.Kind,
+						deploymentFile.Metadata.Name,
+						"--timeout",kube.RolloutTimeout,
+					),
+				)
+			}
+		}
+	}
+	return commands
+}
+
+func findYAMLFiles(path string) []string {
+	var files []string
+	filepath.Walk(path, func(path string, f os.FileInfo, _ error) error {
+		if !f.IsDir() {
+			r, err := regexp.MatchString(".yml", f.Name())
+			if err == nil && r {
+				files = append(files, path)
+			}
+			r, err = regexp.MatchString(".yaml", f.Name())
+			if err == nil && r {
+				files = append(files, path)
+			}
+		}
+		return nil
+	})
+	return files
 }

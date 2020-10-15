@@ -30,6 +30,8 @@ type (
 		Kustomize   string
 		AppVersion  string
 		ImageName   string
+		Rollout		string
+		RolloutTimeout	string
 	}
 
 	// Plugin represents the plugin instance to be executed
@@ -99,6 +101,10 @@ func (p Plugin) Exec() error {
 		} else {
 			return fmt.Errorf("valid actions are: apply, destroy.  You provided %s", action)
 		}
+	}
+
+	if p.Kube.Rollout == "true"{
+		commands = append(commands, checkRolloutStatus(p.Kube)...)
 	}
 
 	// Run commands

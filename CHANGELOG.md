@@ -3,6 +3,13 @@
 All notable changes will be shown here.
 
 Versioning follows Semantic Versioning principals.
+
+## v.1.3.0 - 2020-10-15
+### Added
+- Support for rollout status checks. This is ON by default.
+Users can disable this feature by adding setting `rollout_check: false`
+Users can change timeout for rollout check with `rollout_timeout`
+
 ## v1.2.2 - 2020-09-16
 ### Bug fix
 - Fixed diff in kustomize command

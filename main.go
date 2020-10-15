@@ -103,6 +103,18 @@ func main() {
 			Usage:  "Image name to be changed",
 			EnvVar: "PLUGIN_IMAGE",
 		},
+		cli.StringFlag{
+			Name:	"rolloutCheck",
+			Usage:	"Checking rollout status",
+			EnvVar: "PLUGIN_ROLLOUT_CHECK",
+			Value: 	"true",
+		},
+		cli.StringFlag{
+			Name:	"rolloutTimeout",
+			Usage:	"Timeout of rollout",
+			EnvVar: "PLUGIN_ROLLOUT_TIMEOUT",
+			Value:	"1m",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -130,6 +142,8 @@ func run(c *cli.Context) error {
 			AppVersion:  c.String("image.version"),
 			Kustomize:   c.String("kustomize"),
 			ImageName:   c.String("image.name"),
+			Rollout: 	 c.String("rolloutCheck"),
+			RolloutTimeout: c.String("rolloutTimeout"),
 		},
 	}
 
