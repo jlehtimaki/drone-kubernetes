@@ -23,7 +23,7 @@ This plugin enables easy deployments to do Kubernetes in your EKS clusters and B
 | PLUGIN_CLUSTER_NAME   | EKS Cluster name              | NO            | EKS-Cluster   | -              |
 | PLUGIN_MANIFEST_DIR   | Directory holding the manifests| NO           | ./            | -              |
 | PLUGIN_KUSTOMIZE      | Use Kustomize                 | NO            | false         | true / false   |
-| PLUGIN_VERSION        | Version to deploy             | NO            | -             | -              |
+| PLUGIN_IMAGE_VERSION  | Version to deploy             | NO            | -             | -              |
 | PLUGIN_IMAGE          | Image name of the deployment. Used with Kustomize | NO | -    | -              |
 | PLUGIN_TYPE           | Type of Kubernetes deployment | NO            | Baremetal     | EKS / Baremetal|
 | PLUGIN_TOKEN          | Kubernetes authentication token| NO           | -             | -              |
